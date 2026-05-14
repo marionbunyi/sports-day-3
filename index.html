@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sports Quiz - Timed & Animated</title>
+    <title>Sports Quiz - Fixed Layout</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
     <style>
@@ -68,7 +68,7 @@
             box-shadow: 0 15px 30px rgba(0,0,0,0.5);
         }
 
-        /* CIRCULAR MOVEMENT FOR NAMES */
+        /* ORBIT ANIMATION */
         .floating-option {
             position: absolute;
             background: white;
@@ -82,7 +82,6 @@
             white-space: nowrap;
             z-index: 20;
             pointer-events: auto;
-            /* Circular orbit animation */
             animation: orbit var(--speed) linear infinite;
         }
 
@@ -91,7 +90,7 @@
             100% { transform: translate(var(--x), var(--y)) rotate(360deg) translateX(30px) rotate(-360deg); }
         }
 
-        /* SLOWER FALLING GEAR */
+        /* FALLING GEAR */
         .falling-option {
             position: absolute;
             top: -250px;
@@ -106,7 +105,6 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            /* Slowed down fall (7 seconds) */
             animation: drop 7s linear infinite;
             z-index: 20;
             pointer-events: auto;
@@ -119,28 +117,31 @@
             100% { top: 110vh; }
         }
 
+        /* UPDATED GRID FOR BETTER CLICKABILITY IN STEP 3 */
         .options-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            width: 100%;
-            max-width: 700px;
+            grid-template-columns: 1fr; /* Single column for bigger buttons */
+            gap: 20px;
+            width: 90%;
+            max-width: 500px;
             z-index: 25;
+            margin-top: 10px;
         }
 
         .option-card {
             background: white;
             color: #0b1320;
-            padding: 25px;
-            border-radius: 20px;
-            font-size: 2.2rem;
-            font-weight: 700;
+            padding: 20px;
+            border-radius: 25px;
+            font-size: 2.5rem;
+            font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 10px 0 #bdc3c7, 0 0 0 3px black;
+            box-shadow: 0 10px 0 #bdc3c7, 0 0 0 4px black;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100px;
+            min-height: 110px;
+            text-transform: uppercase;
         }
 
         #result-screen {
@@ -276,7 +277,6 @@ function loadStep() {
         optContainer.style.pointerEvents = "auto";
         let choices = shuffle([...sportsList]).filter(s => s !== data.sport).slice(0, 3);
         choices.push(data.sport);
-        // Fixed grid zones to prevent overlap, but items orbit within them
         const zones = [{x:15,y:25}, {x:65,y:25}, {x:15,y:65}, {x:65,y:65}];
         shuffle(choices).forEach((name, i) => createFloating(name, data.sport, zones[i]));
     } 
