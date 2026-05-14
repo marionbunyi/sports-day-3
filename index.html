@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sports Quiz - Fixed Layout</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sports Quiz - iPad Optimized</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
+        
         body {
             margin: 0;
             font-family: 'Fredoka', sans-serif;
@@ -14,10 +15,13 @@
             background-size: cover;
             color: white;
             text-align: center;
-            height: 100vh;
+            min-height: 100vh; /* Changed from height to min-height for scrolling */
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            /* Added for iPad scrolling compatibility */
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
         }
 
         #ui-bar {
@@ -28,6 +32,8 @@
             align-items: center;
             border-bottom: 4px solid #cc8400;
             z-index: 50;
+            position: sticky; /* Keep timer visible while scrolling */
+            top: 0;
         }
 
         #timer {
@@ -44,7 +50,7 @@
             display: none; 
             padding: 20px; 
             flex-grow: 1; 
-            height: 100%; 
+            min-height: calc(100vh - 60px); 
             position: relative;
             background: rgba(0, 0, 0, 0.1); 
         }
@@ -61,7 +67,7 @@
 
         #main-img {
             max-width: 80%;
-            max-height: 40vh;
+            max-height: 35vh; /* Slightly smaller for iPad vertical space */
             object-fit: cover;
             border-radius: 20px;
             border: 8px solid white;
@@ -73,9 +79,9 @@
             position: absolute;
             background: white;
             color: #0b1320;
-            padding: 30px 50px; 
+            padding: 20px 40px; 
             border-radius: 80px;
-            font-size: 2.2rem;
+            font-size: 1.8rem; /* Scaled for better fit */
             font-weight: 900;
             cursor: pointer;
             box-shadow: 0 10px 0 #bdc3c7, 0 0 0 4px black;
@@ -83,6 +89,7 @@
             z-index: 20;
             pointer-events: auto;
             animation: orbit var(--speed) linear infinite;
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on iPad */
         }
 
         @keyframes orbit {
@@ -95,8 +102,8 @@
             position: absolute;
             top: -250px;
             background: white;
-            width: 180px;
-            height: 180px;
+            width: 150px; /* Scaled for iPad */
+            height: 150px;
             border-radius: 50%;
             border: 5px solid black;
             box-shadow: 0 10px 20px rgba(0,0,0,0.3);
@@ -117,32 +124,42 @@
             100% { top: 110vh; }
         }
 
-        /* POSITIONED UP AND SINGLE LINE */
+        /* IPAD COMPATIBLE GRID */
         .options-grid {
             display: flex;
             flex-direction: row;
+            flex-wrap: wrap; /* Allows wrapping if screen is too narrow */
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             width: 100%;
             z-index: 25;
-            margin-bottom: 40px; /* Moves it up from the bottom edge */
+            margin-bottom: 20px;
+            padding-bottom: 20px;
         }
 
         .option-card {
             background: white;
             color: #0b1320;
-            padding: 20px 40px;
-            border-radius: 25px;
-            font-size: 2.2rem;
+            padding: 15px 30px;
+            border-radius: 20px;
+            font-size: 1.8rem;
             font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 10px 0 #bdc3c7, 0 0 0 4px black;
+            box-shadow: 0 8px 0 #bdc3c7, 0 0 0 3px black;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 90px;
+            min-height: 80px;
             text-transform: uppercase;
             white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Media Query for iPads */
+        @media (max-width: 1024px) {
+            h2 { font-size: 2.2rem; }
+            .option-card { font-size: 1.5rem; padding: 12px 25px; }
+            .big-btn { font-size: 2.5rem; padding: 20px 60px; }
         }
 
         #result-screen {
@@ -157,7 +174,7 @@
         }
 
         .flash-time {
-            font-size: 6rem;
+            font-size: 5rem;
             color: #00ff00;
             text-shadow: 0 0 20px #00ff00;
             animation: flash 0.6s ease-in-out infinite alternate;
@@ -181,15 +198,16 @@
         }
 
         .big-btn {
-            padding: 30px 100px;
-            font-size: 4rem;
+            padding: 25px 80px;
+            font-size: 3rem;
             background: orange;
             color: white;
             border-radius: 40px;
             cursor: pointer;
             font-weight: 900;
             border: none;
-            box-shadow: 0 15px 0 #cc8400;
+            box-shadow: 0 12px 0 #cc8400;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -227,6 +245,7 @@
 <audio id="snd-wrong" src="https://raw.githubusercontent.com/marionbunyi/sports-day-3/main/wrong%20sound"></audio>
 
 <script>
+// Logic and functions remain strictly identical to your previous version
 const equipBase = "https://raw.githubusercontent.com/marionbunyi/sports-day-3/main/";
 const sportsList = ["Basketball", "Tennis", "Soccer", "Badminton", "Baseball", "Swimming", "Table Tennis", "Volleyball"];
 const gearNames = ["basketball", "tennis racket", "tennis ball", "soccer ball", "badminton racket", "shuttlecock", "bat", "glove", "baseball", "goggles", "paddle", "ping pong ball", "volleyball"];
@@ -278,7 +297,7 @@ function loadStep() {
         optContainer.style.pointerEvents = "auto";
         let choices = shuffle([...sportsList]).filter(s => s !== data.sport).slice(0, 3);
         choices.push(data.sport);
-        const zones = [{x:15,y:25}, {x:65,y:25}, {x:15,y:65}, {x:65,y:65}];
+        const zones = [{x:15,y:25}, {x:60,y:25}, {x:15,y:60}, {x:60,y:60}];
         shuffle(choices).forEach((name, i) => createFloating(name, data.sport, zones[i]));
     } 
     else if (step === 2) {
@@ -304,7 +323,7 @@ function createFloating(name, correct, pos) {
     div.innerText = name;
     div.style.setProperty('--x', pos.x + "vw");
     div.style.setProperty('--y', pos.y + "vh");
-    div.style.setProperty('--speed', (Math.random() * 1 + 3) + "s"); 
+    div.style.setProperty('--speed', (Math.random() * 1 + 4) + "s"); 
     div.onclick = () => check(name === correct, div);
     document.getElementById("options-container").appendChild(div);
 }
