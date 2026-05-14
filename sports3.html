@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sports Quiz - Timed & Animated</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Fredoka', sans-serif;
+            background: url('https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #ui-bar {
+            background: rgba(255, 165, 0, 0.9);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #cc8400;
+            z-index: 50;
+        }
+
+        #timer {
+            font-size: 1.5rem;
+            background: #000;
+            padding: 5px 15px;
+            border-radius: 10px;
+            color: #00ff00;
+            min-width: 120px;
+            font-family: monospace;
+        }
+
+        .screen { 
+            display: none; 
+            padding: 20px; 
+            flex-grow: 1; 
+            height: 100%; 
+            position: relative;
+            background: rgba(0, 0, 0, 0.1); 
+        }
+
+        .active { display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; }
+
+        h2 { 
+            font-size: 2.8rem; 
+            margin: 10px 0; 
+            color: #ffd166;
+            text-shadow: 4px 4px 0px black;
+            z-index: 25;
+        }
+
+        #main-img {
+            max-width: 80%;
+            max-height: 40vh;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 8px solid white;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        /* CIRCULAR MOVEMENT FOR NAMES */
+        .floating-option {
+            position: absolute;
+            background: white;
+            color: #0b1320;
+            padding: 30px 50px; 
+            border-radius: 80px;
+            font-size: 2.2rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #bdc3c7, 0 0 0 4px black;
+            white-space: nowrap;
+            z-index: 20;
+            pointer-events: auto;
+            /* Circular orbit animation */
+            animation: orbit var(--speed) linear infinite;
+        }
+
+        @keyframes orbit {
+            0% { transform: translate(var(--x), var(--y)) rotate(0deg) translateX(30px) rotate(0deg); }
+            100% { transform: translate(var(--x), var(--y)) rotate(360deg) translateX(30px) rotate(-360deg); }
+        }
+
+        /* SLOWER FALLING GEAR */
+        .falling-option {
+            position: absolute;
+            top: -250px;
+            background: white;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 5px solid black;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            /* Slowed down fall (7 seconds) */
+            animation: drop 7s linear infinite;
+            z-index: 20;
+            pointer-events: auto;
+        }
+
+        .falling-option img { width: 85%; height: 85%; object-fit: contain; }
+
+        @keyframes drop {
+            0% { top: -250px; }
+            100% { top: 110vh; }
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+            max-width: 700px;
+            z-index: 25;
+        }
+
+        .option-card {
+            background: white;
+            color: #0b1320;
+            padding: 25px;
+            border-radius: 20px;
+            font-size: 2.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #bdc3c7, 0 0 0 3px black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
+        }
+
+        #result-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flash-time {
+            font-size: 6rem;
+            color: #00ff00;
+            text-shadow: 0 0 20px #00ff00;
+            animation: flash 0.6s ease-in-out infinite alternate;
+            margin: 20px 0;
+        }
+
+        @keyframes flash {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        #next-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(46, 204, 113, 0.95);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .big-btn {
+            padding: 30px 100px;
+            font-size: 4rem;
+            background: orange;
+            color: white;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 900;
+            border: none;
+            box-shadow: 0 15px 0 #cc8400;
+        }
+    </style>
+</head>
+<body>
+
+<div id="ui-bar">
+    <h1 style="background:transparent; border:none; padding:0; font-size: 1.5rem;">SPORTS QUIZ</h1>
+    <div id="timer">00:00</div>
+</div>
+
+<div id="start-screen" class="screen active">
+    <button class="big-btn" onclick="startGame()">START</button>
+</div>
+
+<div id="game-screen" class="screen">
+    <h2 id="question-text">Question</h2>
+    <div id="img-holder" style="flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%;">
+        <img id="main-img" src="">
+    </div>
+    <div id="options-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none;"></div>
+    <div id="grid-box" class="options-grid"></div>
+    <div id="next-overlay">
+        <button class="big-btn" onclick="handleNext()">NEXT ➔</button>
+    </div>
+</div>
+
+<div id="result-screen">
+    <h2 style="color: white; font-size: 3rem;">CHAMPION!</h2>
+    <p style="font-size: 2rem;">TOTAL TIME:</p>
+    <div class="flash-time" id="final-time">00:00</div>
+    <button class="big-btn" onclick="location.reload()">RESTART</button>
+</div>
+
+<audio id="snd-correct" src="https://raw.githubusercontent.com/marionbunyi/sports-day-3/main/correct%20sound"></audio>
+<audio id="snd-wrong" src="https://raw.githubusercontent.com/marionbunyi/sports-day-3/main/wrong%20sound"></audio>
+
+<script>
+const equipBase = "https://raw.githubusercontent.com/marionbunyi/sports-day-3/main/";
+const sportsList = ["Basketball", "Tennis", "Soccer", "Badminton", "Baseball", "Swimming", "Table Tennis", "Volleyball"];
+const gearNames = ["basketball", "tennis racket", "tennis ball", "soccer ball", "badminton racket", "shuttlecock", "bat", "glove", "baseball", "goggles", "paddle", "ping pong ball", "volleyball"];
+
+const gameData = [
+    { sport: "Basketball", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/basketball.jpg", gearFile: "basketball.jpg", gearName: "basketball" },
+    { sport: "Tennis", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/tennis.jpg", gearFile: "tennis ball.jpg", gearName: "tennis ball" },
+    { sport: "Soccer", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/soccer.jpg", gearFile: "soccer ball.jpg", gearName: "soccer ball" },
+    { sport: "Badminton", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/badminton.jpg", gearFile: "shuttlecock.jpg", gearName: "shuttlecock" },
+    { sport: "Baseball", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/baseball.jpg", gearFile: "bat.jpg", gearName: "bat" },
+    { sport: "Swimming", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/swimming.jpg", gearFile: "goggles.jpg", gearName: "goggles" },
+    { sport: "Table Tennis", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/table tennis.jpg", gearFile: "paddle.jpg", gearName: "paddle" },
+    { sport: "Volleyball", img: "https://raw.githubusercontent.com/marionbunyi/html-game-5th-grade/main/volleyball.jpg", gearFile: "volleyball.jpg", gearName: "volleyball" }
+];
+
+let roundIdx = 0, step = 1, isBusy = false;
+let startTime, timerInt;
+
+function startGame() {
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("game-screen").style.display = "flex";
+    document.getElementById("game-screen").classList.add("active");
+    startTime = Date.now();
+    timerInt = setInterval(() => {
+        let elapsed = Math.floor((Date.now() - startTime) / 1000);
+        let m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        let s = (elapsed % 60).toString().padStart(2, '0');
+        document.getElementById("timer").innerText = `${m}:${s}`;
+    }, 1000);
+    loadStep();
+}
+
+function loadStep() {
+    isBusy = false;
+    const data = gameData[roundIdx];
+    const qText = document.getElementById("question-text");
+    const mainImg = document.getElementById("main-img");
+    const optContainer = document.getElementById("options-container");
+    const gridBox = document.getElementById("grid-box");
+    
+    document.getElementById("next-overlay").style.display = "none";
+    optContainer.innerHTML = "";
+    gridBox.innerHTML = "";
+
+    if (step === 1) {
+        qText.innerText = "What sport is this?";
+        mainImg.style.display = "block";
+        mainImg.src = data.img;
+        optContainer.style.pointerEvents = "auto";
+        let choices = shuffle([...sportsList]).filter(s => s !== data.sport).slice(0, 3);
+        choices.push(data.sport);
+        // Fixed grid zones to prevent overlap, but items orbit within them
+        const zones = [{x:15,y:25}, {x:65,y:25}, {x:15,y:65}, {x:65,y:65}];
+        shuffle(choices).forEach((name, i) => createFloating(name, data.sport, zones[i]));
+    } 
+    else if (step === 2) {
+        qText.innerText = `What do we use in ${data.sport}?`;
+        mainImg.style.display = "none";
+        optContainer.style.pointerEvents = "auto";
+        let gear = shuffle([data.gearFile, ...shuffle(gameData.map(d => d.gearFile).filter(f => f !== data.gearFile)).slice(0, 3)]);
+        const columns = [10, 35, 60, 85];
+        gear.forEach((file, i) => createFalling(file, data.gearFile, columns[i]));
+    } 
+    else if (step === 3) {
+        qText.innerText = "What is this?";
+        mainImg.style.display = "block";
+        mainImg.src = equipBase + encodeURIComponent(data.gearFile);
+        let wrongName = shuffle(gearNames.filter(n => n !== data.gearName))[0];
+        renderGrid([data.gearName, wrongName], data.gearName);
+    }
+}
+
+function createFloating(name, correct, pos) {
+    const div = document.createElement("div");
+    div.className = "floating-option";
+    div.innerText = name;
+    div.style.setProperty('--x', pos.x + "vw");
+    div.style.setProperty('--y', pos.y + "vh");
+    div.style.setProperty('--speed', (Math.random() * 1 + 3) + "s"); 
+    div.onclick = () => check(name === correct, div);
+    document.getElementById("options-container").appendChild(div);
+}
+
+function createFalling(file, correct, colX) {
+    const div = document.createElement("div");
+    div.className = "falling-option";
+    const img = document.createElement("img");
+    img.src = equipBase + encodeURIComponent(file);
+    div.appendChild(img);
+    div.style.left = colX + "vw";
+    div.onclick = () => check(file === correct, div);
+    document.getElementById("options-container").appendChild(div);
+}
+
+function renderGrid(opts, correct) {
+    shuffle(opts).forEach(val => {
+        const div = document.createElement("div");
+        div.className = "option-card";
+        div.innerText = val;
+        div.onclick = () => check(val === correct, div);
+        document.getElementById("grid-box").appendChild(div);
+    });
+}
+
+function check(isCorrect, el) {
+    if (isBusy) return;
+    if (isCorrect) {
+        isBusy = true;
+        document.getElementById("snd-correct").play();
+        el.style.background = "#2ecc71"; el.style.color = "white";
+        setTimeout(() => {
+            if (step === 3) document.getElementById("next-overlay").style.display = "flex";
+            else handleNext();
+        }, 800);
+    } else {
+        document.getElementById("snd-wrong").play();
+        el.style.background = "#e74c3c"; el.style.color = "white";
+        setTimeout(() => { el.style.background = "white"; el.style.color = "#0b1320"; }, 500);
+    }
+}
+
+function handleNext() {
+    if (step < 3) step++; else { step = 1; roundIdx++; }
+    if (roundIdx < gameData.length) loadStep();
+    else {
+        clearInterval(timerInt);
+        document.getElementById("final-time").innerText = document.getElementById("timer").innerText;
+        document.getElementById("result-screen").style.display = "flex";
+    }
+}
+
+function shuffle(a) { return a.sort(() => Math.random() - 0.5); }
+</script>
+</body>
+</html>
